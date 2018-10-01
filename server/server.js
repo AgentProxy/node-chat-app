@@ -13,28 +13,17 @@ app.use(express.static(publicPath));
 
 io.on('connection', (socket) => {
     console.log('New user connected');
-    // socket.emit('newEmail', {
-    //     from: 'ther@example.com',
-    //     text: 'Hey, What is going on.',
-    //     createdAt: 123
-    // });
     socket.on('disconnect', (socket) => {
         console.log('Client disconnected');
     });
-    // socket.on('createEmail', (newEmail) => {
-    //     console.log('createEmail', newEmail);
-    // });
-    socket.emit('newMessage', {
-        from: 'EJFlow32',
-        text: 'WADDUPPPP',
-        createdAt: new Date().toString()
-    });
     socket.on('createMessage', (message) => {
+        io.emit('newMessage', {
+            from: message.from,
+            text: message.text,
+            createdAt: new Date().getTime()
+        })
         console.log(message);
     });
-    //newMessage Event
-    //from, text, createdAt
-    //create message on
 });
 
 server.listen(port, () => {
