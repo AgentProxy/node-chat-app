@@ -13,11 +13,30 @@ function scrollToBottom () {
     if(clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight){
         messages.scrollTop(scrollHeight);
     }
-
 }
 
 socket.on('connect', function () {
-    console.log('Connected to server');
+    var params = jQuery.deparam(window.location.search);
+    socket.emit('join', params, function(err){
+        if(err){
+            alert(err);
+            window.location.href = '/';
+        }
+        else{
+            console.log('No error');
+        }
+    });
+    jQuery('#message-form').on('submit', function(e){
+        e.preventDefault();
+        let messageTextbox = jQuery('[name=message]');
+    
+        socket.emit('createMessage', {
+            from: params.name,
+            text: messageTextbox.val()
+        }, function(){
+            messageTextbox.val('');
+        });
+    });
 });
 
 socket.on('newMessage', function (message){
@@ -30,11 +49,6 @@ socket.on('newMessage', function (message){
     });
     jQuery('#messages').append(html);
     scrollToBottom();
-    // var formattedTime = moment(message.createdAt).format('h:mm a');
-    // console.log('newMessage',message);
-    // var li = jQuery('<li></li>');
-    // li.text(`${message.from} ${formattedTime}: ${message.text}`);
-    // jQuery('#messages').append(li);
 });
 
 socket.on('newLocationMessage', function (message){
@@ -47,33 +61,21 @@ socket.on('newLocationMessage', function (message){
     });
     jQuery('#messages').append(html);
     scrollToBottom();
-    // var li = jQuery('<li></li>');
-    // var a = jQuery('<a target="_blank">My current location</a>')
-    // li.text(`${message.from} ${formattedTime}: `);
-    // a.attr('href',message.url);
-    // li.append(a);
-    // jQuery('#messages').append(li);
-});
-
-socket.on('join', function(message){
-    console.log(message);
 });
 
 socket.on('disconnect', function (){
     console.log('Disconnected from server');
 });
 
-jQuery('#message-form').on('submit', function(e){
-    e.preventDefault();
-    let messageTextbox = jQuery('[name=message]');
+socket.on('updateUserList', function(users){
+    var ol = jQuery('<ol></ol>');
 
-    socket.emit('createMessage', {
-        from: 'User',
-        text: messageTextbox.val()
-    }, function(){
-        messageTextbox.val('');
+    users.forEach(function (user) {
+        ol.append(jQuery('<li></li>').text(user));
     });
+    jQuery('#users').html(ol);
 });
+
 
 let locationButton = jQuery('#send-location');
 locationButton.on('click', function(){
