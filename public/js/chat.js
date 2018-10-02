@@ -26,17 +26,6 @@ socket.on('connect', function () {
             console.log('No error');
         }
     });
-    jQuery('#message-form').on('submit', function(e){
-        e.preventDefault();
-        let messageTextbox = jQuery('[name=message]');
-    
-        socket.emit('createMessage', {
-            from: params.name,
-            text: messageTextbox.val()
-        }, function(){
-            messageTextbox.val('');
-        });
-    });
 });
 
 socket.on('newMessage', function (message){
@@ -76,6 +65,16 @@ socket.on('updateUserList', function(users){
     jQuery('#users').html(ol);
 });
 
+jQuery('#message-form').on('submit', function(e){
+    e.preventDefault();
+    let messageTextbox = jQuery('[name=message]');
+
+    socket.emit('createMessage', {
+        text: messageTextbox.val()
+    }, function(){
+        messageTextbox.val('');
+    });
+});
 
 let locationButton = jQuery('#send-location');
 locationButton.on('click', function(){
